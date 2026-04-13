@@ -149,60 +149,21 @@ class EdgeDataset(data.Dataset):
         return lb
 
 
-    ''' 
-    # 正常训练代码
-    def build_list(self):
-         data_root = os.path.abspath(self.data_root)
-         images_path = os.path.join(data_root, 'image')
-         labels_path = os.path.join(data_root, 'edge')
-    
-         samples = []
-         for ext in self.exts:
-             image_files = sorted([f for f in os.listdir(images_path) if f.endswith(ext)])
-             label_files = sorted([f for f in os.listdir(labels_path) if f.endswith(ext)])
-             assert len(image_files) == len(label_files), "Mismatch between number of images and labels"
-    
-             for image_file, label_file in zip(image_files, label_files):
-                 image_path = os.path.join(images_path, image_file)
-                 lb_path = os.path.join(labels_path, label_file)
-                 samples.append((image_path, lb_path))
-         return samples
-    '''
-    # 多个数据集训练代码
     def build_list(self):
         data_root = os.path.abspath(self.data_root)
+        images_path = os.path.join(data_root, 'image')
+        labels_path = os.path.join(data_root, 'clean')
+
         samples = []
+        for ext in self.exts:
+            image_files = sorted([f for f in os.listdir(images_path) if f.endswith(ext)])
+            label_files = sorted([f for f in os.listdir(labels_path) if f.endswith(ext)])
+            assert len(image_files) == len(label_files), "Mismatch between number of images and labels"
 
-        # 指定的两个文件夹名称
-        specified_folders = ['cat']
-        #['ape', 'cat']
-
-        # 获取 data_root 下的所有子目录
-        subdirs = [d for d in os.listdir(data_root) if os.path.isdir(os.path.join(data_root, d))]
-
-        for subdir in subdirs:
-            # 检查当前子目录是否是我们指定的两个文件夹之一
-            if subdir in specified_folders:
-                subdir_path = os.path.join(data_root, subdir)
-                images_path = os.path.join(subdir_path, 'image')
-                labels_path = os.path.join(subdir_path, 'clean') 
-
-                # 检查图像和标签文件夹是否存在
-                if not os.path.exists(images_path) or not os.path.exists(labels_path):
-                    continue  # 如果路径不存在，跳过该子目录
-
-                for ext in self.exts:
-                    image_files = sorted([f for f in os.listdir(images_path) if f.endswith(ext)])
-                    label_files = sorted([f for f in os.listdir(labels_path) if f.endswith(ext)])
-
-                    # 确保图像和标签文件数量相同
-                    assert len(image_files) == len(label_files), f"Mismatch between number of images and labels in {subdir}"
-
-                    for image_file, label_file in zip(image_files, label_files):
-                        image_path = os.path.join(images_path, image_file)
-                        lb_path = os.path.join(labels_path, label_file)
-                        samples.append((image_path, lb_path))
-
+            for image_file, label_file in zip(image_files, label_files):
+                image_path = os.path.join(images_path, image_file)
+                lb_path = os.path.join(labels_path, label_file)
+                samples.append((image_path, lb_path))
         return samples
         
 
