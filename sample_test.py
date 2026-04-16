@@ -100,7 +100,6 @@ def main(args):
         start_dist=model_cfg.start_dist,
         perceptual_weight=model_cfg.perceptual_weight,
         use_l1=model_cfg.get('use_l1', True),
-        quaternion_weight=model_cfg.get('quaternion_weight', 1.0),  # 新增 quaternion 权重
         cfg=model_cfg,
     )
     data_cfg = cfg.data
