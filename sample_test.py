@@ -201,7 +201,6 @@ class Sampler(object):
                         batch[key] = batch[key].to(device)
                 cond = batch['cond']
                 
-                # 新增 quaternion 相关的测试代码
                 if 'quaternion' in batch:
                     quaternion = batch['quaternion'].to(device)
                 else:
@@ -213,9 +212,9 @@ class Sampler(object):
 
                 mask = batch['ori_mask'] if 'ori_mask' in batch else None
                 if self.cfg.sampler.sample_type == 'whole':
-                    batch_pred = self.whole_sample(cond, raw_size=(raw_h, raw_w), mask=mask, quaternion=quaternion)
+                    batch_pred = self.whole_sample(cond, raw_size=(raw_h, raw_w), mask=mask)
                 elif self.cfg.sampler.sample_type == 'slide':
-                    batch_pred = self.slide_sample(cond, crop_size=self.cfg.sampler.get('crop_size', [320, 320]), stride=self.cfg.sampler.stride, mask=mask, quaternion=quaternion)
+                    batch_pred = self.slide_sample(cond, crop_size=self.cfg.sampler.get('crop_size', [320, 320]), stride=self.cfg.sampler.stride, mask=mask)
                 else:
                     raise NotImplementedError
 
@@ -253,10 +252,10 @@ class Sampler(object):
                 crop_img = inputs[:, :, y1:y2, x1:x2]
 
                 if isinstance(self.model, nn.parallel.DistributedDataParallel):
-                    crop_seg_logit = self.model.module.sample(batch_size=1, cond=crop_img, mask=mask, quaternion=quaternion)
+                    crop_seg_logit = self.model.module.sample(batch_size=1, cond=crop_img, mask=mask)
                     aux_out = None
                 elif isinstance(self.model, nn.Module):
-                    crop_seg_logit = self.model.sample(batch_size=1, cond=crop_img, mask=mask, quaternion=quaternion)
+                    crop_seg_logit = self.model.sample(batch_size=1, cond=crop_img, mask=mask)
                     aux_out = None
                 else:
                     raise NotImplementedError
@@ -283,9 +282,9 @@ class Sampler(object):
     def whole_sample(self, inputs, raw_size, mask=None, quaternion=None):
         inputs = F.interpolate(inputs, size=(416, 416), mode='bilinear', align_corners=True)
         if isinstance(self.model, nn.parallel.DistributedDataParallel):
-            seg_logits = self.model.module.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask, quaternion=quaternion)
+            seg_logits = self.model.module.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask)
         elif isinstance(self.model, nn.Module):
-            seg_logits = self.model.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask, quaternion=quaternion)
+            seg_logits = self.model.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask)
         seg_logits = F.interpolate(seg_logits, size=raw_size, mode='bilinear', align_corners=True)
         return seg_logits
 
