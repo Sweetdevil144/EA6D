@@ -252,10 +252,10 @@ class Sampler(object):
                 crop_img = inputs[:, :, y1:y2, x1:x2]
 
                 if isinstance(self.model, nn.parallel.DistributedDataParallel):
-                    crop_seg_logit = self.model.module.sample(batch_size=1, cond=crop_img, mask=mask)
+                    crop_seg_logit = self.model.module.sample(batch_size=1, cond=crop_img, mask=mask)[0]
                     aux_out = None
                 elif isinstance(self.model, nn.Module):
-                    crop_seg_logit = self.model.sample(batch_size=1, cond=crop_img, mask=mask)
+                    crop_seg_logit = self.model.sample(batch_size=1, cond=crop_img, mask=mask)[0]
                     aux_out = None
                 else:
                     raise NotImplementedError
@@ -282,9 +282,9 @@ class Sampler(object):
     def whole_sample(self, inputs, raw_size, mask=None, quaternion=None):
         inputs = F.interpolate(inputs, size=(416, 416), mode='bilinear', align_corners=True)
         if isinstance(self.model, nn.parallel.DistributedDataParallel):
-            seg_logits = self.model.module.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask)
+            seg_logits = self.model.module.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask)[0]
         elif isinstance(self.model, nn.Module):
-            seg_logits = self.model.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask)
+            seg_logits = self.model.sample(batch_size=inputs.shape[0], cond=inputs, mask=mask)[0]
         seg_logits = F.interpolate(seg_logits, size=raw_size, mode='bilinear', align_corners=True)
         return seg_logits
 
